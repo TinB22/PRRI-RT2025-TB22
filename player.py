@@ -13,6 +13,7 @@ class Player:
         self.rel = 0
         self.health_recovery_delay = 700
         self.time_prev = pg.time.get_ticks()
+        self.is_dead = False
 
     def recover_health(self):
         if self.check_health_recovery_delay() and self.health < PLAYER_MAX_HEALTH:
@@ -26,6 +27,7 @@ class Player:
 
     def check_game_over(self):
         if self.health < 1:
+            self.is_dead = True
             self.game.object_renderer.game_over()
             pg.display.flip()
             pg.time.delay(1500)
