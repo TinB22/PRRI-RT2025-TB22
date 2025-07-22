@@ -7,13 +7,15 @@ class ObjectRenderer:
         self.game = game
         self.screen = game.screen
         self.wall_textures = self.load_wall_textures()
-        self.sky_image = self.get_texture('resources/textures/sky.png', (WIDTH, HALF_HEIGHT))
+        self.sky_image = self.get_texture('resources/textures/floor_prri.png', (WIDTH, HALF_HEIGHT))
         self.sky_offset = 0
         self.blood_screen = self.get_texture('resources/textures/blood_screen.png', RES)
-        self.digit_size = 90
+        self.digit_size = 80
+        self.health_display_y_offset = 20
+        self.health_display_x_start = 20
         self.digit_images = [self.get_texture(f'resources/textures/digits/{i}.png', [self.digit_size] * 2)
-                             for i in range(11)]
-        self.digits = dict(zip(map(str, range(11)), self.digit_images))
+                             for i in range(10)]
+        self.digits = dict(zip(map(str, range(10)), self.digit_images))
         self.game_over_image = self.get_texture('resources/textures/game_over.png', RES)
         self.win_image = self.get_texture('resources/textures/win.png', RES)
 
@@ -31,8 +33,7 @@ class ObjectRenderer:
     def draw_player_health(self):
         health = str(self.game.player.health)
         for i, char in enumerate(health):
-            self.screen.blit(self.digits[char], (i * self.digit_size, 0))
-        self.screen.blit(self.digits['10'], ((i + 1) * self.digit_size, 0))
+            self.screen.blit(self.digits[char], (self.health_display_x_start + i * self.digit_size, self.health_display_y_offset))
 
     def player_damage(self):
         self.screen.blit(self.blood_screen, (0, 0))
@@ -56,9 +57,9 @@ class ObjectRenderer:
 
     def load_wall_textures(self):
         return {
-            1: self.get_texture('resources/textures/1.png'),
-            2: self.get_texture('resources/textures/2.png'),
-            3: self.get_texture('resources/textures/3.png'),
-            4: self.get_texture('resources/textures/4.png'),
-            5: self.get_texture('resources/textures/5.png'),
+            1: self.get_texture('resources/textures/wall_prri.png'),
+            2: self.get_texture('resources/textures/wall_prri-modified.png'),
+            3: self.get_texture('resources/textures/wall_prri.png'),
+            4: self.get_texture('resources/textures/firewall_prri.png'),
+            5: self.get_texture('resources/textures/motherboard_prri.png'),
         }
