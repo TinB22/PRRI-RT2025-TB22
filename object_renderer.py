@@ -7,8 +7,13 @@ class ObjectRenderer:
         self.game = game
         self.screen = game.screen
         self.wall_textures = self.load_wall_textures()
-        self.sky_image = self.get_texture('resources/textures/floor_prri.png', (WIDTH, HALF_HEIGHT))
-        self.sky_offset = 0
+        
+        self.floor_texture = self.get_texture('resources/textures/floor_prri.png', (WIDTH, HALF_HEIGHT))
+        
+        self.sky_image = self.get_texture('resources/textures/sky.png', (WIDTH, HALF_HEIGHT))
+        self.sky_offset = 0 
+        self.floor_offset = 0 
+
         self.blood_screen = self.get_texture('resources/textures/blood_screen.png', RES)
         self.digit_size = 80
         self.health_display_y_offset = 20
@@ -31,8 +36,8 @@ class ObjectRenderer:
         self.screen.blit(self.game_over_image, (0, 0))
 
     def draw_player_health(self):
-        health = str(self.game.player.health)
-        for i, char in enumerate(health):
+        health_str = str(self.game.player.health)
+        for i, char in enumerate(health_str):
             self.screen.blit(self.digits[char], (self.health_display_x_start + i * self.digit_size, self.health_display_y_offset))
 
     def player_damage(self):
@@ -42,8 +47,11 @@ class ObjectRenderer:
         self.sky_offset = (self.sky_offset + 4.5 * self.game.player.rel) % WIDTH
         self.screen.blit(self.sky_image, (-self.sky_offset, 0))
         self.screen.blit(self.sky_image, (-self.sky_offset + WIDTH, 0))
-        # floor
-        pg.draw.rect(self.screen, FLOOR_COLOR, (0, HALF_HEIGHT, WIDTH, HEIGHT))
+        
+        self.floor_offset = (self.floor_offset + 4.5 * self.game.player.rel) % WIDTH 
+        self.screen.blit(self.floor_texture, (-self.floor_offset, HALF_HEIGHT))
+        self.screen.blit(self.floor_texture, (-self.floor_offset + WIDTH, HALF_HEIGHT))
+        
 
     def render_game_objects(self):
         list_objects = sorted(self.game.raycasting.objects_to_render, key=lambda t: t[0], reverse=True)

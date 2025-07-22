@@ -11,19 +11,19 @@ from weapon import *
 from sound import *
 from pathfinding import *
 
-#    Napraviti projektni plan i GDD (engl. game design document).
-#    Izgraditi i dizajnirati grafičke elemente igre u Cyber Hack stilu.
-#    Implementirati RayTracing algoritam za renderiranje svjetlosnih efekata.
-#    Razviti gameplay mehanike pucačine u prvom licu.
-#    Dodati različite vrste oružja i neprijatelja.
-#    Implementirati interaktivne elemente i zagonetke povezane s tematikom igre.
-#    Izraditi dokumentaciju projekta.
+#    Napraviti projektni plan i GDD (engl. game design document)
+#    Izgraditi i dizajnirati grafičke elemente igre u Cyber Hack stilu -> Sve riješio, moram još promjeniti: npc-e i one baklje 
+#    Implementirati RayTracing algoritam za renderiranje svjetlosnih efekata
+#    Razviti gameplay mehanike pucačine u prvom licu
+#    Dodati različite vrste oružja i neprijatelja
+#    Implementirati interaktivne elemente i zagonetke povezane s tematikom igre
+#    Izraditi dokumentaciju projekta
 #    Ideje:
-#    - Igra je smještena u računalu, gdje igrač mora očistiti sustav od zlonamjernog softvera.
+#    - Igra je smještena u računalu, gdje igrač mora očistiti sustav od zlonamjernog softvera
 #    - Igrač je antivirusni program koji se bori protiv zlonamjernih softverskih entiteta (virusa [trojanac, worm, malware])
-#    - Igrač koristi različite vrste antivirusnih alata (oružja) za borbu protiv zlonamjernog softvera.
-#    - Biti će to labirint koji igrač prolazi kako bi došao do kraja igre (3 levela [trojanac, worm, malware]).
-#    - na kraju igrač dolazi do matične ploče i brani je od malware-a (final boss-a).
+#    - Igrač koristi različite vrste antivirusnih alata (oružja) za borbu protiv zlonamjernog softvera
+#    - Biti će to labirint koji igrač prolazi kako bi došao do kraja igre (3 levela [trojanac, worm, malware])
+#    - na kraju igrač dolazi do matične ploče i brani je od malware-a (final boss-a)
 
 
 class Game:
