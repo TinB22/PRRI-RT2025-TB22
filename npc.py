@@ -184,12 +184,12 @@ class NPC(AnimatedSprite):
                          (100 * self.x, 100 * self.y), 2)
 
 
-class SoldierNPC(NPC):
-    def __init__(self, game, path='resources/sprites/npc/soldier/0.png', pos=(10.5, 5.5),
+class WormNPC(NPC):
+    def __init__(self, game, path='resources/sprites/npc/worm/0.png', pos=(10.5, 5.5),
                  scale=0.6, shift=0.38, animation_time=180):
         super().__init__(game, path, pos, scale, shift, animation_time)
 
-class CacoDemonNPC(NPC):
+class TrojanNPC(NPC):
     def __init__(self, game, path='resources/sprites/npc/trojan/0.png', pos=(10.5, 6.5),
                  scale=0.7, shift=0.27, animation_time=250):
         super().__init__(game, path, pos, scale, shift, animation_time)
