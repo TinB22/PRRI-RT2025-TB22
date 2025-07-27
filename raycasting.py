@@ -19,7 +19,7 @@ class RayCasting:
                 wall_column = self.textures[texture].subsurface(
                     offset * (TEXTURE_SIZE - SCALE), 0, SCALE, TEXTURE_SIZE
                 )
-                wall_column = pg.transform.scale(wall_column, (SCALE, proj_height))
+                wall_column = pg.transform.smoothscale(wall_column, (SCALE, proj_height))
                 wall_pos = (ray * SCALE, HALF_HEIGHT - proj_height // 2)
             else:
                 texture_height = TEXTURE_SIZE * HEIGHT / proj_height

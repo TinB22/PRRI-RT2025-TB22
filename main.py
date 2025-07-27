@@ -11,12 +11,13 @@ from weapon import *
 from sound import *
 from pathfinding import *
 
-#    Napraviti projektni plan i GDD (engl. game design document)
-#    Izgraditi i dizajnirati grafičke elemente igre u Cyber Hack stilu -> Sve riješio, moram još promjeniti: npc-e i one baklje 
-#    Implementirati RayTracing algoritam za renderiranje svjetlosnih efekata
-#    Razviti gameplay mehanike pucačine u prvom licu
+#    Napraviti projektni plan i GDD (engl. game design document) +
+#    Izgraditi i dizajnirati grafičke elemente igre u Cyber Hack stilu +
+#    Implementirati RayTracing algoritam za renderiranje svjetlosnih efekata +
+#    Implementirati interaktivne elemente i zagonetke povezane s tematikom igre - dodati 3 levela
+#    zagonetke (tojanac dropa ljuč za vrata za 2. level gdje su wormovi itd.)
+#    Razviti gameplay mehanike pucačine u prvom licu - dodati reload, materijale koje mob-ovi dropaju i stol na kojem se od njih gradi municija
 #    Dodati različite vrste oružja i neprijatelja
-#    Implementirati interaktivne elemente i zagonetke povezane s tematikom igre
 #    Izraditi dokumentaciju projekta
 #    Ideje:
 #    - Igra je smještena u računalu, gdje igrač mora očistiti sustav od zlonamjernog softvera
