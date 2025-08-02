@@ -1,5 +1,6 @@
 from sprite_object import *
-
+from collections import deque
+import pygame as pg
 
 class Weapon(AnimatedSprite):
     def __init__(self, game, path='resources/sprites/weapon/shotgun/0.png', scale=0.4, animation_time=90):
@@ -7,7 +8,8 @@ class Weapon(AnimatedSprite):
         self.images = deque(
             [pg.transform.smoothscale(img, (self.image.get_width() * scale, self.image.get_height() * scale))
              for img in self.images])
-        self.weapon_pos = (HALF_WIDTH - self.images[0].get_width() // 2, HEIGHT - self.images[0].get_height())
+        self.weapon_pos = (HALF_WIDTH - self.images[0].get_width() // 2,
+                           HEIGHT - self.images[0].get_height())
         self.reloading = False
         self.num_images = len(self.images)
         self.frame_counter = 0
@@ -23,6 +25,15 @@ class Weapon(AnimatedSprite):
                 if self.frame_counter == self.num_images:
                     self.reloading = False
                     self.frame_counter = 0
+
+    def check_hit_in_npc(self):
+        if self.ray_cast_value and self.game.player.shot:
+            if HALF_WIDTH - self.sprite_half_width < self.screen_x < HALF_WIDTH + self.sprite_half_width:
+                self.game.sound.npc_pain.play()
+                self.game.player.shot = False
+                self.pain = True
+                self.health -= self.game.weapon.damage
+                self.check_health()
 
     def draw(self):
         self.game.screen.blit(self.images[0], self.weapon_pos)

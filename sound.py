@@ -1,16 +1,25 @@
 import pygame as pg
 
-
 class Sound:
     def __init__(self, game):
         self.game = game
         pg.mixer.init()
         self.path = 'resources/sound/'
-        self.shotgun = pg.mixer.Sound(self.path + 'shotgun.wav')
-        self.npc_pain = pg.mixer.Sound(self.path + 'npc_pain.wav')
-        self.npc_death = pg.mixer.Sound(self.path + 'npc_death.wav')
-        self.npc_shot = pg.mixer.Sound(self.path + 'npc_attack.wav')
-        self.npc_shot.set_volume(0.2)
-        self.player_pain = pg.mixer.Sound(self.path + 'player_pain.wav')
-        self.theme = pg.mixer.music.load(self.path + 'theme.mp3')
-        pg.mixer.music.set_volume(0.4)
+
+        # Učitaj sve zvukove
+        self.shotgun = self.load_sound('shotgun.wav')
+        self.npc_pain = self.load_sound('npc_pain.wav')
+        self.npc_death = self.load_sound('npc_death.wav')
+        self.npc_attack = self.load_sound('npc_attack.wav', volume=0.2)
+        self.player_pain = self.load_sound('player_pain.wav')
+        self.theme = self.load_sound('theme.mp3', volume=0.4)
+    
+
+    def load_sound(self, filename, volume=1.0):
+        try:
+            sound = pg.mixer.Sound(self.path + filename)
+            sound.set_volume(volume)
+            return sound
+        except FileNotFoundError:
+            print(f"[WARNING] Sound file not found: {filename}")
+            return None

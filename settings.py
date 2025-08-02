@@ -7,8 +7,8 @@ HALF_WIDTH = WIDTH // 2
 HALF_HEIGHT = HEIGHT // 2
 FPS = 0
 
-PLAYER_POS = 1.5, 5  # mini_map
-PLAYER_ANGLE = 0
+PLAYER_POS = 1.5, 1.5 # mini_map - MALO SAM PROMJENIO ZBOG NOVIH MAPA
+PLAYER_ANGLE = math.pi / 2 #za svaki slučaj da gleda prema dolje da smo sigurni da nije ovo razlog bugova
 PLAYER_SPEED = 0.004
 PLAYER_ROT_SPEED = 0.002
 PLAYER_SIZE_SCALE = 60

@@ -14,8 +14,10 @@ from pathfinding import *
 #    Napraviti projektni plan i GDD (engl. game design document) +
 #    Izgraditi i dizajnirati grafičke elemente igre u Cyber Hack stilu +
 #    Implementirati RayTracing algoritam za renderiranje svjetlosnih efekata +
-#    Implementirati interaktivne elemente i zagonetke povezane s tematikom igre - dodati 3 levela
+#    Implementirati interaktivne elemente i zagonetke povezane s tematikom igre - dodati 3 levela +
 #    zagonetke (tojanac dropa ljuč za vrata za 2. level gdje su wormovi itd.)
+#    dodati to da plavi sprite-ovi heal-aju igrača kada im je u blizini
+#    vidjeti kako dodati neki health bar (plavi u boju sprite-ova koji heal-aju)
 #    Razviti gameplay mehanike pucačine u prvom licu - dodati reload, materijale koje mob-ovi dropaju i stol na kojem se od njih gradi municija
 #    Dodati različite vrste oružja i neprijatelja
 #    Izraditi dokumentaciju projekta
@@ -25,7 +27,6 @@ from pathfinding import *
 #    - Igrač koristi različite vrste antivirusnih alata (oružja) za borbu protiv zlonamjernog softvera
 #    - Biti će to labirint koji igrač prolazi kako bi došao do kraja igre (3 levela [trojanac, worm, malware])
 #    - na kraju igrač dolazi do matične ploče i brani je od malware-a (final boss-a)
-
 
 class Game:
     def __init__(self):
@@ -38,92 +39,103 @@ class Game:
         self.global_event = pg.USEREVENT + 0
         pg.time.set_timer(self.global_event, 40)
         self.is_paused = False
-        self.new_game()
+
+        self.current_level = 1
+        self.max_level = 3
+        self.game_won = False
+
         self.running = True
+        self.new_game()
 
     def new_game(self):
-        self.map = Map(self)
+        self.map = Map(self, level=self.current_level)
         self.player = Player(self)
         self.object_renderer = ObjectRenderer(self)
         self.raycasting = RayCasting(self)
-        self.object_handler = ObjectHandler(self)
         self.weapon = Weapon(self)
         self.sound = Sound(self)
         self.pathfinding = PathFinding(self)
-        pg.mixer.music.play(-1)
+        self.object_handler = ObjectHandler(self)
 
-    def update(self):
-        if not self.is_paused:
-            self.player.update()
-            self.raycasting.update()
-            self.object_handler.update()
-            self.weapon.update()
+        if self.sound.theme:
+            self.sound.theme.play(-1)
 
-            if self.player.is_dead:
-                self.handle_player_death()
-                return
+    def show_next_level_screen(self):
+        font = pg.font.SysFont("Consolas", 50)
+        text = font.render(f"Level {self.current_level} Complete!", True, (0, 255, 180))
+        subtext = font.render("Press any key for next level...", True, (200, 200, 200))
 
-            pg.display.flip()
-            self.delta_time = self.clock.tick(FPS)
-            pg.display.set_caption(f'{self.clock.get_fps():.1f}')
-        else:
-            pg.display.flip()
-            self.clock.tick(FPS)
-
-    def draw(self):
-        if not self.is_paused:
-            self.object_renderer.draw()
-            self.weapon.draw()
-
-    def handle_player_death(self):
-        self.is_paused = True
-        pg.mixer.music.stop()
-        pg.mouse.set_visible(True)
-
-        font = pg.font.SysFont("Consolas", 40)
-        text = font.render("YOU DIED – Returning to Menu...", True, (255, 0, 0))
-        rect = text.get_rect(center=(RES[0] // 2, RES[1] // 2))
         self.screen.fill((0, 0, 0))
-        self.screen.blit(text, rect)
+        self.screen.blit(text, text.get_rect(center=(RES[0] // 2, RES[1] // 2 - 40)))
+        self.screen.blit(subtext, subtext.get_rect(center=(RES[0] // 2, RES[1] // 2 + 40)))
         pg.display.flip()
-        pg.time.delay(2000)
 
-        self.running = False  
+        waiting = True
+        while waiting:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    pg.quit()
+                    sys.exit()
+                if event.type == pg.KEYDOWN or event.type == pg.MOUSEBUTTONDOWN:
+                    waiting = False
+
+    def check_level_complete(self):
+        if all(not npc.alive for npc in self.object_handler.npc_list):
+            pg.time.delay(500)
+            if self.current_level < self.max_level:
+                self.show_next_level_screen()
+                self.current_level += 1
+                self.new_game()
+            else:
+                self.game_won = True
 
     def check_events(self):
-        self.global_trigger = False
         for event in pg.event.get():
-            if event.type == pg.QUIT:
+            if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
                 pg.quit()
                 sys.exit()
-            elif event.type == pg.KEYDOWN:
-                if event.key == pg.K_ESCAPE:
-                    self.is_paused = not self.is_paused
-                    if self.is_paused:
-                        pg.mixer.music.pause()
-                        pg.mouse.set_visible(True)
-                        main_menu_instance = MainMenu(self.screen)
-                        main_menu_instance.run()
-                        if main_menu_instance.selected_option_action == "quit":
-                            pg.quit()
-                            sys.exit()
-                        else:
-                            self.is_paused = False
-                            pg.mixer.music.unpause()
-                            pg.mouse.set_visible(False)
 
-            elif event.type == self.global_event:
+            if event.type == pg.KEYDOWN and event.key == pg.K_p:
+                self.is_paused = not self.is_paused
+
+            self.player.single_fire_event(event)
+
+            if event.type == self.global_event:
                 self.global_trigger = True
+            else:
+                self.global_trigger = False
 
-            if not self.is_paused:
-                self.player.single_fire_event(event)
+    def update(self):
+        if not self.is_paused and not self.game_won:
+            self.raycasting.update()
+            self.player.update()
+            self.object_handler.update()
+            self.weapon.update()
+            self.check_level_complete()
+
+        self.object_renderer.draw()
+        self.weapon.draw()
+
+        pg.display.flip()
+        self.delta_time = self.clock.tick(FPS)
+        pg.display.set_caption(f"{self.clock.get_fps():.1f}")
+
+    def draw_win_screen(self):
+        font = pg.font.SysFont("Consolas", 60)
+        text = font.render("YOU WON!", True, (0, 255, 180))
+        self.screen.fill((0, 0, 0))
+        self.screen.blit(text, text.get_rect(center=(RES[0] // 2, RES[1] // 2)))
+        pg.display.flip()
+        pg.time.delay(3000)
 
     def run(self):
-        self.running = True 
-        while True:
+        while self.running:
             self.check_events()
-            self.update()
-            self.draw()
+            if self.game_won:
+                self.draw_win_screen()
+                return
+            else:
+                self.update()
 
 
 class MainMenu:
@@ -131,7 +143,7 @@ class MainMenu:
         self.screen = screen
         self.clock = pg.time.Clock()
         self.font = pg.font.SysFont("Consolas", 50)
-        self.options = ["Start Game", "Settings", "Credits", "Quit"]
+        self.options = ["Start Game", "Quit"]
         self.selected = 0
         self.running = True
         self.selected_option_action = None
@@ -139,9 +151,9 @@ class MainMenu:
     def draw(self):
         self.screen.fill((10, 10, 10))
         for i, option in enumerate(self.options):
-            color = (0, 255, 180) if i == self.selected else (100, 100, 100)
+            color = (0, 255, 180) if i == self.selected else (150, 150, 150)
             text = self.font.render(option, True, color)
-            rect = text.get_rect(center=(RES[0] // 2, 200 + i * 80))
+            rect = text.get_rect(center=(RES[0] // 2, 250 + i * 80))
             self.screen.blit(text, rect)
         pg.display.flip()
 
@@ -150,8 +162,6 @@ class MainMenu:
             self.clock.tick(60)
             for event in pg.event.get():
                 if event.type == pg.QUIT:
-                    self.running = False
-                    self.selected_option_action = "quit"
                     pg.quit()
                     sys.exit()
                 elif event.type == pg.KEYDOWN:
@@ -161,61 +171,16 @@ class MainMenu:
                         self.selected = (self.selected + 1) % len(self.options)
                     elif event.key == pg.K_RETURN:
                         if self.options[self.selected] == "Start Game":
+                            self.selected_option_action = "start"
                             self.running = False
-                            self.selected_option_action = "start_game"
                         elif self.options[self.selected] == "Quit":
-                            self.running = False
-                            self.selected_option_action = "quit"
                             pg.quit()
                             sys.exit()
-                        elif self.options[self.selected] == "Credits":
-                            self.show_credits()
-                        elif self.options[self.selected] == "Settings":
-                            self.show_settings()
-                    elif event.key == pg.K_ESCAPE:
-                        self.running = False
-                        self.selected_option_action = "start_game"
 
             self.draw()
 
-    def show_credits(self):
-        self.screen.fill((10, 10, 10))
-        font_small = pg.font.SysFont("Consolas", 30)
-        lines = ["Cyber Hack by Tin", "", "Made with Python + Pygame", "", "Press ESC to go back"]
-        for i, line in enumerate(lines):
-            text = font_small.render(line, True, (0, 255, 180))
-            rect = text.get_rect(center=(RES[0] // 2, 200 + i * 40))
-            self.screen.blit(text, rect)
-        pg.display.flip()
 
-        while True:
-            for event in pg.event.get():
-                if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
-                    return
-                elif event.type == pg.QUIT:
-                    pg.quit()
-                    sys.exit()
-
-    def show_settings(self):
-        self.screen.fill((10, 10, 10))
-        font_small = pg.font.SysFont("Consolas", 30)
-        lines = ["Settings coming soon...", "", "Press ESC to go back"]
-        for i, line in enumerate(lines):
-            text = font_small.render(line, True, (0, 255, 180))
-            rect = text.get_rect(center=(RES[0] // 2, 250 + i * 40))
-            self.screen.blit(text, rect)
-        pg.display.flip()
-
-        while True:
-            for event in pg.event.get():
-                if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
-                    return
-                elif event.type == pg.QUIT:
-                    pg.quit()
-                    sys.exit()
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     pg.init()
     screen = pg.display.set_mode(RES)
 
@@ -223,9 +188,8 @@ if __name__ == '__main__':
         menu = MainMenu(screen)
         menu.run()
 
-        if menu.selected_option_action == "start_game":
+        if menu.selected_option_action == "start":
             game = Game()
             game.run()
-        elif menu.selected_option_action == "quit":
-            pg.quit()
-            sys.exit()
+        else:
+            break
