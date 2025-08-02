@@ -1,6 +1,8 @@
 from sprite_object import *
 from npc import spawn_npcs_by_level
 from random import randrange
+import pygame as pg
+import math
 
 
 class ObjectHandler:
@@ -53,9 +55,26 @@ class ObjectHandler:
             sprite.update()
         for npc in self.npc_list:
             npc.update()
+            
+        # pickup kljuca sa E
+        keys = pg.key.get_pressed()
+        for sprite in self.sprite_list[:]:
+            if hasattr(sprite, "is_key") and sprite.is_key:
+                dist = math.hypot(self.game.player.x - sprite.x, self.game.player.y - sprite.y)
+                if dist < 2.5 and keys[pg.K_e]:
+                    self.game.player.has_key = True
+                    self.sprite_list.remove(sprite)
+                    print("[DEBUG] Player picked up the key!")
 
     def add_npc(self, npc):
         self.npc_list.append(npc)
 
     def add_sprite(self, sprite):
         self.sprite_list.append(sprite)
+        
+    def spawn_key(self, pos):
+        anim_path = 'resources/sprites/animated_sprites/card/'
+        key_sprite = AnimatedSprite(self.game, path=anim_path + '0.png', pos=pos, scale=0.5, shift=0.3)
+        key_sprite.is_key = True
+        self.sprite_list.append(key_sprite)
+

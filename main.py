@@ -10,12 +10,13 @@ from object_handler import *
 from weapon import *
 from sound import *
 from pathfinding import *
+import math
 
 #    Napraviti projektni plan i GDD (engl. game design document) +
 #    Izgraditi i dizajnirati grafičke elemente igre u Cyber Hack stilu +
 #    Implementirati RayTracing algoritam za renderiranje svjetlosnih efekata +
 #    Implementirati interaktivne elemente i zagonetke povezane s tematikom igre - dodati 3 levela +
-#    zagonetke (tojanac dropa ljuč za vrata za 2. level gdje su wormovi itd.)
+#    zagonetke (tojanac dropa ljuč za vrata za 2. level gdje su wormovi itd.) +
 #    dodati to da plavi sprite-ovi heal-aju igrača kada im je u blizini
 #    vidjeti kako dodati neki health bar (plavi u boju sprite-ova koji heal-aju)
 #    Razviti gameplay mehanike pucačine u prvom licu - dodati reload, materijale koje mob-ovi dropaju i stol na kojem se od njih gradi municija
@@ -80,7 +81,8 @@ class Game:
                     waiting = False
 
     def check_level_complete(self):
-        if all(not npc.alive for npc in self.object_handler.npc_list):
+        alive_npcs = any(npc.alive for npc in self.object_handler.npc_list)
+        if not alive_npcs and self.check_firewall_unlock():
             pg.time.delay(500)
             if self.current_level < self.max_level:
                 self.show_next_level_screen()
@@ -116,7 +118,11 @@ class Game:
         self.object_renderer.draw()
         self.weapon.draw()
 
-        pg.display.flip()
+        # 🔹 Dodaj ovdje prije flip()
+        self.draw_firewall_message()
+        self.draw_key_message()
+
+        pg.display.flip()  # 🔹 flip uvijek mora biti zadnji
         self.delta_time = self.clock.tick(FPS)
         pg.display.set_caption(f"{self.clock.get_fps():.1f}")
 
@@ -136,6 +142,48 @@ class Game:
                 return
             else:
                 self.update()
+                
+    def check_firewall_unlock(self):
+        for (x, y), value in self.map.world_map.items():
+            if value == 5:
+                dist = math.hypot(self.player.x - x, self.player.y - y)
+                if dist < 2.5:  # isti threshold kao i za poruku
+                    keys = pg.key.get_pressed()
+                    if keys[pg.K_e] and self.player.has_key:
+                        return True
+        return False
+    
+    def draw_firewall_message(self):
+        for (x, y), value in self.map.world_map.items():
+            if value == 5:
+                dist = math.hypot(self.player.x - x, self.player.y - y)
+                if dist < 2.5:  # euklidska udaljenost do firewall-a (najkraća linija između dvije točke u prostoru)
+                    font = pg.font.SysFont("Consolas", 30)
+                    if self.player.has_key:
+                        msg = "Press [E] to unlock next level"
+                        color = (0, 255, 0)
+                    else:
+                        msg = "You need a key to unlock this firewall!"
+                        color = (255, 50, 50)
+
+                    text = font.render(msg, True, color)
+                    self.screen.blit(
+                        text, 
+                        (RES[0] // 2 - text.get_width() // 2, RES[1] - 100)
+                    )
+                    
+    def draw_key_message(self):
+        for sprite in self.object_handler.sprite_list:
+            if hasattr(sprite, "is_key") and sprite.is_key:
+                dist = math.hypot(self.player.x - sprite.x, self.player.y - sprite.y)
+                if dist < 1.0:  # dovoljno blizu
+                    font = pg.font.SysFont("Consolas", 30)
+                    msg = "Press [E] to pick up key"
+                    text = font.render(msg, True, (255, 255, 0))
+                    self.screen.blit(
+                        text, 
+                        (RES[0] // 2 - text.get_width() // 2, RES[1] - 150)
+                    )
 
 
 class MainMenu:

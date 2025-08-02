@@ -83,6 +83,20 @@ class NPC(AnimatedSprite):
         if self.health <= 0:
             self.alive = False
             self.game.sound.npc_death.play()
+            
+            # ako je ubijen zadnji torjan mob ili worm mob, spawnaj kljuc
+            if isinstance(self, Trojan):
+                alive_trojans = [npc for npc in self.game.object_handler.npc_list if isinstance(npc, Trojan) and npc.alive]
+                if len(alive_trojans) == 0:
+                    self.game.object_handler.spawn_key(self.map_pos)
+
+            elif isinstance(self, Worm) and self.game.current_level == 2:
+                alive_worms = [npc for npc in self.game.object_handler.npc_list if isinstance(npc, Worm) and npc.alive]
+                if len(alive_worms) == 0:
+                    self.game.object_handler.spawn_key(self.map_pos)
+                    
+            elif isinstance(self, MalwareBoss) and self.game.current_level == 3:
+                self.game.object_handler.spawn_key(self.map_pos)
 
     def run_logic(self):
         if self.alive:
