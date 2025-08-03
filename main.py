@@ -17,17 +17,9 @@ import math
 #    Implementirati RayTracing algoritam za renderiranje svjetlosnih efekata +
 #    Implementirati interaktivne elemente i zagonetke povezane s tematikom igre - dodati 3 levela +
 #    zagonetke (tojanac dropa ljuč za vrata za 2. level gdje su wormovi itd.) +
-#    dodati to da plavi sprite-ovi heal-aju igrača kada im je u blizini
-#    vidjeti kako dodati neki health bar (plavi u boju sprite-ova koji heal-aju)
 #    Razviti gameplay mehanike pucačine u prvom licu - dodati reload, materijale koje mob-ovi dropaju i stol na kojem se od njih gradi municija
-#    Dodati različite vrste oružja i neprijatelja
+#    Dodati različite vrste oružja 
 #    Izraditi dokumentaciju projekta
-#    Ideje:
-#    - Igra je smještena u računalu, gdje igrač mora očistiti sustav od zlonamjernog softvera
-#    - Igrač je antivirusni program koji se bori protiv zlonamjernih softverskih entiteta (virusa [trojanac, worm, malware])
-#    - Igrač koristi različite vrste antivirusnih alata (oružja) za borbu protiv zlonamjernog softvera
-#    - Biti će to labirint koji igrač prolazi kako bi došao do kraja igre (3 levela [trojanac, worm, malware])
-#    - na kraju igrač dolazi do matične ploče i brani je od malware-a (final boss-a)
 
 class Game:
     def __init__(self):
@@ -44,7 +36,7 @@ class Game:
         self.current_level = 1
         self.max_level = 3
         self.game_won = False
-
+        
         self.running = True
         self.new_game()
 
@@ -53,10 +45,18 @@ class Game:
         self.player = Player(self)
         self.object_renderer = ObjectRenderer(self)
         self.raycasting = RayCasting(self)
-        self.weapon = Weapon(self)
         self.sound = Sound(self)
         self.pathfinding = PathFinding(self)
         self.object_handler = ObjectHandler(self)
+
+        weapon_stats = [
+            {"path": "resources/sprites/weapon/shotgun/0.png", "scale": 0.4, "animation_time": 90, "damage": 50, "reload_time": 15, "shot_delay": 200},
+            {"path": "resources/sprites/weapon/rifle/0.png", "scale": 0.35, "animation_time": 70, "damage": 35, "reload_time": 20, "shot_delay": 120},
+            {"path": "resources/sprites/weapon/minigun/0.png", "scale": 0.5, "animation_time": 50, "damage": 25, "reload_time": 30, "shot_delay": 80},
+        ]
+
+        stats = weapon_stats[self.current_level - 1]
+        self.weapon = Weapon(self, weapon_data=stats)
 
         if self.sound.theme:
             self.sound.theme.play(-1)
@@ -118,11 +118,10 @@ class Game:
         self.object_renderer.draw()
         self.weapon.draw()
 
-        # 🔹 Dodaj ovdje prije flip()
         self.draw_firewall_message()
         self.draw_key_message()
 
-        pg.display.flip()  # 🔹 flip uvijek mora biti zadnji
+        pg.display.flip() 
         self.delta_time = self.clock.tick(FPS)
         pg.display.set_caption(f"{self.clock.get_fps():.1f}")
 
@@ -147,7 +146,7 @@ class Game:
         for (x, y), value in self.map.world_map.items():
             if value == 5:
                 dist = math.hypot(self.player.x - x, self.player.y - y)
-                if dist < 2.5:  # isti threshold kao i za poruku
+                if dist < 2.5:  # isti threshold kao i za poruku (prije je bila pre daleko)
                     keys = pg.key.get_pressed()
                     if keys[pg.K_e] and self.player.has_key:
                         return True

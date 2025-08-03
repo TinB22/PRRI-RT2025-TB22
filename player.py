@@ -51,6 +51,10 @@ class Player:
                 self.shot = True
                 self.game.weapon.reloading = True
 
+        # dodao tipku R za reload
+        if event.type == pg.KEYDOWN and event.key == pg.K_r:
+            self.game.weapon.reload()
+
     def movement(self):
         sin_a = math.sin(self.angle)
         cos_a = math.cos(self.angle)

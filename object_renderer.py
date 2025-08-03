@@ -54,14 +54,13 @@ class ObjectRenderer:
         self.screen.blit(self.blood_screen, (0, 0))
 
     def draw_background(self):
-        # Pomiči nebo i pod ovisno o pomaku miša
+        # nebo se pomiče s micanjem miša
         self.sky_offset = (self.sky_offset + 4.5 * self.game.player.rel) % WIDTH
         self.screen.blit(self.sky_image, (-self.sky_offset, 0))
         self.screen.blit(self.sky_image, (-self.sky_offset + WIDTH, 0))
 
-        self.floor_offset = (self.floor_offset + 4.5 * self.game.player.rel) % WIDTH
-        self.screen.blit(self.floor_texture, (-self.floor_offset, HALF_HEIGHT))
-        self.screen.blit(self.floor_texture, (-self.floor_offset + WIDTH, HALF_HEIGHT))
+        # pod statičan (jednostavna slika/tekstura)
+        self.screen.blit(self.floor_texture, (0, HALF_HEIGHT))
 
     def render_game_objects(self):
         list_objects = sorted(self.game.raycasting.objects_to_render, key=lambda t: t[0], reverse=True)

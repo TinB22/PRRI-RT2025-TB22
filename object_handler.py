@@ -12,17 +12,17 @@ class ObjectHandler:
         self.npc_list = []
         self.npc_positions = set()
 
-        # Spawn mobova prema trenutnom levelu
+        # spawnanje mobova prema trenutnom levelu
         self.spawn_npc()
 
-        # Dodavanje static i dinamic sprite-ova
+        # dodavanje static i dinamic sprite-ova
         self.add_default_sprites()
 
     def add_default_sprites(self):
         add_sprite = self.add_sprite
         anim_path = 'resources/sprites/animated_sprites/'
 
-        # Dodavanje static i dinamic sprite-ova
+        # dodavanje static i dinamic sprite-ova
         add_sprite(AnimatedSprite(self.game))
         add_sprite(AnimatedSprite(self.game, pos=(1.5, 1.5)))
         add_sprite(AnimatedSprite(self.game, pos=(1.5, 7.5)))
@@ -44,7 +44,7 @@ class ObjectHandler:
         level = getattr(self.game, "current_level", 1)
         self.npc_list = spawn_npcs_by_level(self.game, level)
 
-        # Filtriraj spawn tako da se mob ne spawn-a na zidu
+        # filtrirao spawn tako da se mob ne spawn-a na zidu
         self.npc_positions = {
             npc.map_pos for npc in self.npc_list if npc.map_pos not in self.game.map.world_map
         }

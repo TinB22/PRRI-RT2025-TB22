@@ -6,7 +6,6 @@ class Sound:
         pg.mixer.init()
         self.path = 'resources/sound/'
 
-        # Učitaj sve zvukove
         self.shotgun = self.load_sound('shotgun.wav')
         self.npc_pain = self.load_sound('npc_pain.wav')
         self.npc_death = self.load_sound('npc_death.wav')

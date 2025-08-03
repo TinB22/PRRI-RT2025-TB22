@@ -8,14 +8,14 @@ class NPC(AnimatedSprite):
                  health=100, attack_damage=10, speed=0.03, accuracy=0.15):
         super().__init__(game, path, pos, scale, shift, animation_time)
 
-        # Animacije
+        # animacije
         self.attack_images = self.get_images(self.path + '/attack')
         self.death_images = self.get_images(self.path + '/death')
         self.idle_images = self.get_images(self.path + '/idle')
         self.pain_images = self.get_images(self.path + '/pain')
         self.walk_images = self.get_images(self.path + '/walk')
 
-        # Statistike NPC-a
+        # statistike NPC-a
         self.attack_dist = randint(3, 6)
         self.speed = speed
         self.size = 20
@@ -23,7 +23,7 @@ class NPC(AnimatedSprite):
         self.attack_damage = attack_damage
         self.accuracy = accuracy
 
-        # Status
+        # status
         self.alive = True
         self.pain = False
         self.ray_cast_value = False
@@ -141,7 +141,7 @@ class NPC(AnimatedSprite):
         sin_a = math.sin(ray_angle)
         cos_a = math.cos(ray_angle)
 
-        # horizontals
+        # horizontalni
         y_hor, dy = (y_map + 1, 1) if sin_a > 0 else (y_map - 1e-6, -1)
         depth_hor = (y_hor - oy) / sin_a
         x_hor = ox + depth_hor * cos_a
@@ -159,7 +159,7 @@ class NPC(AnimatedSprite):
             y_hor += dy
             depth_hor += delta_depth
 
-        # verticals
+        # vertikalni
         x_vert, dx = (x_map + 1, 1) if cos_a > 0 else (x_map - 1e-6, -1)
         depth_vert = (x_vert - ox) / cos_a
         y_vert = oy + depth_vert * sin_a
@@ -182,7 +182,7 @@ class NPC(AnimatedSprite):
         return 0 < player_dist < wall_dist or not wall_dist
 
 
-# ➤ Nove klase za tvoje NPC-e
+# preuredene klase za NPC-e
 class Trojan(NPC):
     def __init__(self, game, pos):
         super().__init__(game,
