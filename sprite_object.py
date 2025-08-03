@@ -2,7 +2,7 @@ import pygame as pg
 from settings import *
 import os
 from collections import deque
-
+import math
 
 class SpriteObject:
     def __init__(self, game, path='resources/sprites/static_sprites/candlebra.png',
@@ -49,9 +49,6 @@ class SpriteObject:
         if -self.IMAGE_HALF_WIDTH < self.screen_x < (WIDTH + self.IMAGE_HALF_WIDTH) and self.norm_dist > 0.5:
             self.get_sprite_projection()
 
-    def update(self):
-        self.get_sprite()
-
 
 class AnimatedSprite(SpriteObject):
     def __init__(self, game, path='resources/sprites/animated_sprites/green_light/0.png',
@@ -64,7 +61,7 @@ class AnimatedSprite(SpriteObject):
         self.animation_trigger = False
 
     def update(self):
-        super().update()
+        self.get_sprite()
         self.check_animation_time()
         self.animate(self.images)
 
@@ -73,11 +70,13 @@ class AnimatedSprite(SpriteObject):
             images.rotate(-1)
             self.image = images[0]
 
-    def check_animation_time(self):
+    def check_animation_time(self, custom_time=None):
         self.animation_trigger = False
-        time_now = pg.time.get_ticks()
-        if time_now - self.animation_time_prev > self.animation_time:
-            self.animation_time_prev = time_now
+        current_time = pg.time.get_ticks()
+        anim_time = custom_time if custom_time else self.animation_time
+
+        if current_time - self.animation_time_prev > anim_time:
+            self.animation_time_prev = current_time
             self.animation_trigger = True
 
     def get_images(self, path):

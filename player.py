@@ -45,13 +45,8 @@ class Player:
 
     def single_fire_event(self, event):
         if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
-            if not self.shot and not self.game.weapon.reloading:
-                if self.game.sound.shotgun:
-                    self.game.sound.shotgun.play()
-                self.shot = True
-                self.game.weapon.reloading = True
+            self.game.weapon.start_shoot()
 
-        # dodao tipku R za reload
         if event.type == pg.KEYDOWN and event.key == pg.K_r:
             self.game.weapon.reload()
 

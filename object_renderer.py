@@ -49,6 +49,11 @@ class ObjectRenderer:
                     self.digits[char],
                     (self.health_display_x_start + i * self.digit_size, self.health_display_y_offset)
                 )
+    
+    def draw_ammo(self):
+        font = pg.font.SysFont("Consolas", 30)
+        text = font.render(f"Ammo: {self.weapon.ammo}/{self.weapon.max_ammo}", True, (255, 255, 0))
+        self.screen.blit(text, (20, HEIGHT - 50))
 
     def player_damage(self):
         self.screen.blit(self.blood_screen, (0, 0))

@@ -17,8 +17,10 @@ import math
 #    Implementirati RayTracing algoritam za renderiranje svjetlosnih efekata +
 #    Implementirati interaktivne elemente i zagonetke povezane s tematikom igre - dodati 3 levela +
 #    zagonetke (tojanac dropa ljuč za vrata za 2. level gdje su wormovi itd.) +
-#    Razviti gameplay mehanike pucačine u prvom licu - dodati reload, materijale koje mob-ovi dropaju i stol na kojem se od njih gradi municija
-#    Dodati različite vrste oružja 
+#    razviti reload animaciju +
+#    Razviti gameplay mehanike pucačine u prvom licu - dodati reload +
+#    Dodati različite vrste oružja +
+#    dodati jos jedno oruzje za 3. lvl i malo ulijepsati you won screen i pocetni dodati credits
 #    Izraditi dokumentaciju projekta
 
 class Game:
@@ -36,7 +38,7 @@ class Game:
         self.current_level = 1
         self.max_level = 3
         self.game_won = False
-        
+
         self.running = True
         self.new_game()
 
@@ -49,14 +51,35 @@ class Game:
         self.pathfinding = PathFinding(self)
         self.object_handler = ObjectHandler(self)
 
-        weapon_stats = [
-            {"path": "resources/sprites/weapon/shotgun/0.png", "scale": 0.4, "animation_time": 90, "damage": 50, "reload_time": 15, "shot_delay": 200},
-            {"path": "resources/sprites/weapon/rifle/0.png", "scale": 0.35, "animation_time": 70, "damage": 35, "reload_time": 20, "shot_delay": 120},
-            {"path": "resources/sprites/weapon/minigun/0.png", "scale": 0.5, "animation_time": 50, "damage": 25, "reload_time": 30, "shot_delay": 80},
+
+        weapon_data_list = [
+            {  # lvl 1 – shotgun
+                "path": "resources/sprites/weapon/shotgun/0.png",
+                "scale": 0.4,
+                "damage": 50,
+                "shot_delay": 400,
+                "reload_time": 300,
+                "shoot_anim_time": 80,
+                "reload_anim_time": 300,
+                "shoot_folder": "resources/sprites/weapon/shotgun/shotgun_shoot",
+                "reload_folder": "resources/sprites/weapon/shotgun/shotgun_reload"
+            },
+            {  # lvl 2 – gun1
+                "path": "resources/sprites/weapon/gun1/0.png",
+                "scale": 0.45,
+                "damage": 35,
+                "shot_delay": 250,
+                "reload_time": 500,
+                "shoot_anim_time": 100,
+                "reload_anim_time": 300,
+                "shoot_folder": "resources/sprites/weapon/gun1/gun1_shot",
+                "reload_folder": "resources/sprites/weapon/gun1/gun1_reload"
+            }
         ]
 
-        stats = weapon_stats[self.current_level - 1]
-        self.weapon = Weapon(self, weapon_data=stats)
+        # tu odabiremo weapon po lvl-u
+        index = min(self.current_level - 1, len(weapon_data_list) - 1)
+        self.weapon = Weapon(self, weapon_data=weapon_data_list[index])
 
         if self.sound.theme:
             self.sound.theme.play(-1)
@@ -68,7 +91,7 @@ class Game:
 
         self.screen.fill((0, 0, 0))
         self.screen.blit(text, text.get_rect(center=(RES[0] // 2, RES[1] // 2 - 40)))
-        self.screen.blit(subtext, subtext.get_rect(center=(RES[0] // 2, RES[1] // 2 + 40)))
+        self.screen.blit(subtext, text.get_rect(center=(RES[0] // 2, RES[1] // 2 + 40)))
         pg.display.flip()
 
         waiting = True
@@ -117,11 +140,14 @@ class Game:
 
         self.object_renderer.draw()
         self.weapon.draw()
+        
+        self.weapon.draw()
+        self.draw_ammo()
 
         self.draw_firewall_message()
         self.draw_key_message()
 
-        pg.display.flip() 
+        pg.display.flip()
         self.delta_time = self.clock.tick(FPS)
         pg.display.set_caption(f"{self.clock.get_fps():.1f}")
 
@@ -141,22 +167,22 @@ class Game:
                 return
             else:
                 self.update()
-                
+
     def check_firewall_unlock(self):
         for (x, y), value in self.map.world_map.items():
             if value == 5:
                 dist = math.hypot(self.player.x - x, self.player.y - y)
-                if dist < 2.5:  # isti threshold kao i za poruku (prije je bila pre daleko)
+                if dist < 2.5:
                     keys = pg.key.get_pressed()
                     if keys[pg.K_e] and self.player.has_key:
                         return True
         return False
-    
+
     def draw_firewall_message(self):
         for (x, y), value in self.map.world_map.items():
             if value == 5:
                 dist = math.hypot(self.player.x - x, self.player.y - y)
-                if dist < 2.5:  # euklidska udaljenost do firewall-a (najkraća linija između dvije točke u prostoru)
+                if dist < 2.5:
                     font = pg.font.SysFont("Consolas", 30)
                     if self.player.has_key:
                         msg = "Press [E] to unlock next level"
@@ -167,22 +193,27 @@ class Game:
 
                     text = font.render(msg, True, color)
                     self.screen.blit(
-                        text, 
+                        text,
                         (RES[0] // 2 - text.get_width() // 2, RES[1] - 100)
                     )
-                    
+
     def draw_key_message(self):
         for sprite in self.object_handler.sprite_list:
             if hasattr(sprite, "is_key") and sprite.is_key:
                 dist = math.hypot(self.player.x - sprite.x, self.player.y - sprite.y)
-                if dist < 1.0:  # dovoljno blizu
+                if dist < 1.0:
                     font = pg.font.SysFont("Consolas", 30)
                     msg = "Press [E] to pick up key"
                     text = font.render(msg, True, (255, 255, 0))
                     self.screen.blit(
-                        text, 
+                        text,
                         (RES[0] // 2 - text.get_width() // 2, RES[1] - 150)
                     )
+                    
+    def draw_ammo(self):
+        font = pg.font.SysFont("Consolas", 30)
+        text = font.render(f"Ammo: {self.weapon.ammo}/{self.weapon.max_ammo}", True, (255, 255, 0))
+        self.screen.blit(text, (40, HEIGHT - 50))
 
 
 class MainMenu:
