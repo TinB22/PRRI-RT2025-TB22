@@ -194,7 +194,7 @@ class Worm(NPC):
     def __init__(self, game, pos):
         super().__init__(game,
                          path='resources/sprites/npc/worm/0.png',
-                         pos=pos, health=100, attack_damage=15, speed=0.04, accuracy=0.25)
+                         pos=pos, health=100, attack_damage=10, speed=0.04, accuracy=0.25)
 
 class MalwareBoss(NPC):
     def __init__(self, game, pos):

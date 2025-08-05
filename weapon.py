@@ -7,8 +7,15 @@ class Weapon(AnimatedSprite):
     def __init__(self, game, weapon_data):
         self.game = game
         self.weapon_data = weapon_data
-        self.max_ammo = 6      
-        self.ammo = self.max_ammo
+
+        # Infinite ammo postavka
+        self.infinite_ammo = weapon_data.get("infinite_ammo", False)
+        if self.infinite_ammo:
+            self.max_ammo = float("inf")
+            self.ammo = float("inf")
+        else:
+            self.max_ammo = 6
+            self.ammo = self.max_ammo
 
         path = weapon_data["path"]
         scale = weapon_data["scale"]
@@ -22,14 +29,17 @@ class Weapon(AnimatedSprite):
         self.weapon_pos = (HALF_WIDTH - self.images[0].get_width() // 2,
                            HEIGHT - self.images[0].get_height())
 
+        # Učitavanje animacija
         self.shoot_images = self.load_images_from_folder(weapon_data["shoot_folder"], scale)
-        self.reload_images = self.load_images_from_folder(weapon_data["reload_folder"], scale)
+        if weapon_data.get("reload_folder"):
+            self.reload_images = self.load_images_from_folder(weapon_data["reload_folder"], scale)
+        else:
+            self.reload_images = []
 
         self.state = "idle"
         self.frame_counter = 0
         self.damage = weapon_data["damage"]
 
-        # dodao za kontrolu brzine animacija
         self.shoot_anim_time = weapon_data["shoot_anim_time"]
         self.reload_anim_time = weapon_data["reload_anim_time"]
         self.shot_delay = weapon_data["shot_delay"]
@@ -39,25 +49,29 @@ class Weapon(AnimatedSprite):
 
     def load_images_from_folder(self, folder, scale):
         images = []
-        for file in sorted(os.listdir(folder)):
-            if file.endswith(".png"):
-                img = pg.image.load(os.path.join(folder, file)).convert_alpha()
-                img = pg.transform.smoothscale(img, (self.image.get_width() * scale, self.image.get_height() * scale))
-                images.append(img)
+        if folder and os.path.exists(folder):
+            for file in sorted(os.listdir(folder)):
+                if file.endswith(".png"):
+                    img = pg.image.load(os.path.join(folder, file)).convert_alpha()
+                    img = pg.transform.smoothscale(img, (self.image.get_width() * scale, self.image.get_height() * scale))
+                    images.append(img)
         return images
 
     def start_shoot(self):
         now = pg.time.get_ticks()
-        if self.state == "idle" and self.ammo > 0 and (now - self.last_shot_time >= self.shot_delay):
+        if self.state == "idle" and (self.infinite_ammo or self.ammo > 0) and (now - self.last_shot_time >= self.shot_delay):
             self.state = "shooting"
             self.frame_counter = 0
             self.game.player.shot = True
             self.last_shot_time = now
-            self.ammo -= 1  # da svaki shot troši bullet
+            if not self.infinite_ammo:
+                self.ammo -= 1
             if self.game.sound.shotgun:
                 self.game.sound.shotgun.play()
 
     def reload(self):
+        if self.infinite_ammo:
+            return
         now = pg.time.get_ticks()
         if self.state == "idle" and (now - self.last_reload_time >= self.reload_time):
             self.state = "reloading"
@@ -83,7 +97,7 @@ class Weapon(AnimatedSprite):
                 self.state = "idle"
                 self.frame_counter = 0
                 self.image = self.images[0]
-                self.ammo = self.max_ammo 
+                self.ammo = self.max_ammo
 
     def draw(self):
         self.game.screen.blit(self.image, self.weapon_pos)

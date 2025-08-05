@@ -20,7 +20,8 @@ import math
 #    razviti reload animaciju +
 #    Razviti gameplay mehanike pucačine u prvom licu - dodati reload +
 #    Dodati različite vrste oružja +
-#    dodati jos jedno oruzje za 3. lvl i malo ulijepsati you won screen i pocetni dodati credits
+#    dodati jos jedno oruzje za 3. lvl sa vecim mag-om +
+#    malo ulijepsati you won screen i pocetni dodati credits
 #    Izraditi dokumentaciju projekta
 
 class Game:
@@ -74,6 +75,18 @@ class Game:
                 "reload_anim_time": 300,
                 "shoot_folder": "resources/sprites/weapon/gun1/gun1_shot",
                 "reload_folder": "resources/sprites/weapon/gun1/gun1_reload"
+            },
+            {  # lvl 3 – gun2
+                "path": "resources/sprites/weapon/gun2/0.png",
+                "scale": 0.45,
+                "damage": 20,
+                "shot_delay": 180,
+                "shoot_anim_time": 90,
+                "reload_anim_time": 0,
+                "reload_time": 0,
+                "shoot_folder": "resources/sprites/weapon/gun2/gun2_shot",
+                "reload_folder": None,  # Nema reload foldera - jer je infinite ammo za zadnjeg npc-a
+                "infinite_ammo": True
             }
         ]
 
