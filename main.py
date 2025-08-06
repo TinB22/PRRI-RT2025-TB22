@@ -21,7 +21,7 @@ import math
 #    Razviti gameplay mehanike pucačine u prvom licu - dodati reload +
 #    Dodati različite vrste oružja +
 #    dodati jos jedno oruzje za 3. lvl sa vecim mag-om +
-#    malo ulijepsati you won screen i pocetni dodati credits
+#    malo ulijepsati you won screen i pocetni dodati credits +
 #    Izraditi dokumentaciju projekta
 
 class Game:
@@ -42,6 +42,9 @@ class Game:
 
         self.running = True
         self.new_game()
+        
+        self.win_image = pg.image.load("./resources/textures/win.png").convert()
+        self.win_image = pg.transform.scale(self.win_image, RES)
 
     def new_game(self):
         self.map = Map(self, level=self.current_level)
@@ -57,7 +60,7 @@ class Game:
             {  # lvl 1 – shotgun
                 "path": "resources/sprites/weapon/shotgun/0.png",
                 "scale": 0.4,
-                "damage": 50,
+                "damage": 52,
                 "shot_delay": 400,
                 "reload_time": 300,
                 "shoot_anim_time": 80,
@@ -68,7 +71,7 @@ class Game:
             {  # lvl 2 – gun1
                 "path": "resources/sprites/weapon/gun1/0.png",
                 "scale": 0.45,
-                "damage": 35,
+                "damage": 42,
                 "shot_delay": 250,
                 "reload_time": 500,
                 "shoot_anim_time": 100,
@@ -79,7 +82,7 @@ class Game:
             {  # lvl 3 – gun2
                 "path": "resources/sprites/weapon/gun2/0.png",
                 "scale": 0.45,
-                "damage": 20,
+                "damage": 26,
                 "shot_delay": 180,
                 "shoot_anim_time": 90,
                 "reload_anim_time": 0,
@@ -165,12 +168,9 @@ class Game:
         pg.display.set_caption(f"{self.clock.get_fps():.1f}")
 
     def draw_win_screen(self):
-        font = pg.font.SysFont("Consolas", 60)
-        text = font.render("YOU WON!", True, (0, 255, 180))
-        self.screen.fill((0, 0, 0))
-        self.screen.blit(text, text.get_rect(center=(RES[0] // 2, RES[1] // 2)))
+        self.screen.blit(self.win_image, (0, 0))
         pg.display.flip()
-        pg.time.delay(3000)
+        pg.time.delay(5000)
 
     def run(self):
         while self.running:
@@ -234,17 +234,19 @@ class MainMenu:
         self.screen = screen
         self.clock = pg.time.Clock()
         self.font = pg.font.SysFont("Consolas", 50)
-        self.options = ["Start Game", "Quit"]
+        self.options = ["Start Game", "Credits", "Quit"]
         self.selected = 0
         self.running = True
         self.selected_option_action = None
+        self.bg_image = pg.image.load("./resources/textures/bck_start.png").convert()
+        self.bg_image = pg.transform.scale(self.bg_image, RES)
 
     def draw(self):
-        self.screen.fill((10, 10, 10))
+        self.screen.blit(self.bg_image, (0, 0)) 
         for i, option in enumerate(self.options):
-            color = (0, 255, 180) if i == self.selected else (150, 150, 150)
+            color = (0, 255, 180) if i == self.selected else (100, 100, 100)
             text = self.font.render(option, True, color)
-            rect = text.get_rect(center=(RES[0] // 2, 250 + i * 80))
+            rect = text.get_rect(center=(RES[0] // 2, 200 + i * 80))
             self.screen.blit(text, rect)
         pg.display.flip()
 
@@ -253,6 +255,8 @@ class MainMenu:
             self.clock.tick(60)
             for event in pg.event.get():
                 if event.type == pg.QUIT:
+                    self.running = False
+                    self.selected_option_action = "quit"
                     pg.quit()
                     sys.exit()
                 elif event.type == pg.KEYDOWN:
@@ -262,16 +266,42 @@ class MainMenu:
                         self.selected = (self.selected + 1) % len(self.options)
                     elif event.key == pg.K_RETURN:
                         if self.options[self.selected] == "Start Game":
-                            self.selected_option_action = "start"
                             self.running = False
+                            self.selected_option_action = "start_game"
                         elif self.options[self.selected] == "Quit":
+                            self.running = False
+                            self.selected_option_action = "quit"
                             pg.quit()
                             sys.exit()
+                        elif self.options[self.selected] == "Credits":
+                            self.show_credits()
+                    elif event.key == pg.K_ESCAPE:
+                        self.running = False
+                        self.selected_option_action = "start_game"
 
             self.draw()
 
+    def show_credits(self):
+        self.screen.fill((10, 10, 10))
+        self.screen.blit(self.bg_image, (0, 0))
+        font_small = pg.font.SysFont("Consolas", 30)
+        lines = ["Cyber hack by Tin", "", "Made with Python and Pygame", "", "Press ESC to go back..."]
+        for i, line in enumerate(lines):
+            text = font_small.render(line, True, (0, 255, 180))
+            rect = text.get_rect(center=(RES[0] // 2, 200 + i * 40))
+            self.screen.blit(text, rect)
+        pg.display.flip()
 
-if __name__ == "__main__":
+        while True:
+            for event in pg.event.get():
+                if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+                    return
+                elif event.type == pg.QUIT:
+                    pg.quit()
+                    sys.exit()
+
+
+if __name__ == '__main__':
     pg.init()
     screen = pg.display.set_mode(RES)
 
@@ -279,8 +309,9 @@ if __name__ == "__main__":
         menu = MainMenu(screen)
         menu.run()
 
-        if menu.selected_option_action == "start":
+        if menu.selected_option_action == "start_game":
             game = Game()
             game.run()
-        else:
-            break
+        elif menu.selected_option_action == "quit":
+            pg.quit()
+            sys.exit()

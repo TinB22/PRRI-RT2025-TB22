@@ -194,13 +194,13 @@ class Worm(NPC):
     def __init__(self, game, pos):
         super().__init__(game,
                          path='resources/sprites/npc/worm/0.png',
-                         pos=pos, health=100, attack_damage=10, speed=0.04, accuracy=0.25)
+                         pos=pos, health=80, attack_damage=10, speed=0.04, accuracy=0.25)
 
 class MalwareBoss(NPC):
     def __init__(self, game, pos):
         super().__init__(game,
                          path='resources/sprites/npc/malware/0.png',
-                         pos=pos, health=350, attack_damage=20, speed=0.045, accuracy=0.25)
+                         pos=pos, health=350, attack_damage=12, speed=0.045, accuracy=0.25)
 
 def spawn_npcs_by_level(game, level):
     npcs = []
